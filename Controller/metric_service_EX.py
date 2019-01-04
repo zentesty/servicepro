@@ -28,6 +28,10 @@ class FlaskAppWrapper(object):
         self.app.add_url_rule(endpoint, endpoint_name, EndpointAction(handler),methods=methods)
 
 class Metric_Controller:
+    s = Summary('reservation', 'A summary', ['instance', 'run_id', 'loop', 'packaging_level', 'quatity', 'size_epcs'])
+
+    def __init__(self):
+        start_http_server(8000)
 
     def create_service(self):
         print("INA")
@@ -45,11 +49,18 @@ class Metric_Controller:
                 name = content['metrics']['name']
                 instance = content['metrics']['instance']
                 run_id = content['metrics']['run_id']
+
+                loop = content['metrics']['run_id']
+                level = content['metrics']['instance']
+
                 for keys in content['metrics']:
                     print keys + " = " + content['metrics'][keys]
 
                 print(content['metrics'])
                 print(content['values'])
+
+                self.s.labels('VE001', 'Run001', loop, level, 10000, '0').observe(17)
+
                 # Execute anything
         except Exception as e:
             print("Metric Service : Exception could not <publish_metric>")
