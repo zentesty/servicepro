@@ -1,6 +1,7 @@
 from prometheus_client import start_http_server, Summary, Counter, Gauge, Histogram
 from flask import Flask, Response
 from flask import request
+import time
 
 
 
@@ -22,24 +23,22 @@ class FlaskAppWrapper(object):
         self.app = Flask(name)
 
     def run(self):
-        self.app.run(port=5000)
+        self.app.run(host="0.0.0.0", port=5000)
 
     def add_endpoint(self, endpoint=None, endpoint_name=None, handler=None, methods=None):
         self.app.add_url_rule(endpoint, endpoint_name, EndpointAction(handler),methods=methods)
 
 class Metric_Controller:
-    s = Summary('reservation', 'A summary', ['instance', 'run_id', 'loop', 'packaging_level', 'quatity', 'size_epcs'])
+    s = Summary('reservation', 'A summary', ['equipment', 'my_run_id', 'loop', 'packaging_level',
+                                             'quantity', 'size_epcs','call_duration', 'timestamp'])
+#    s = Histogram('reservation', 'A summary', ['instance', 'my_run_id', 'loop', 'packaging_level', 'quatity', 'size_epcs'])
 
     def __init__(self):
-        start_http_server(8000)
+        start_http_server(9222)
 
     def create_service(self):
-        print("INA")
         content = request.get_json()
-        print(content)
-        print(content['name'])
-        print(content['endpoint'])
-
+        pass
 
     def publish_metric(self):
         try:
@@ -47,20 +46,20 @@ class Metric_Controller:
                 content = request.get_json()
                 print(content)
                 name = content['metrics']['name']
-                instance = content['metrics']['instance']
-                run_id = content['metrics']['run_id']
+                if(name == "RESERVATION"):
+                    instance = content['metrics']['instance']
+                    run_id = content['metrics']['run_id']
 
-                loop = content['metrics']['run_id']
-                level = content['metrics']['instance']
+                    loop = content['metrics']['loop']
+                    packaging_level = content['metrics']['packaging_level']
+                    quantity = content['metrics']['quantity']
+                    env_size = content['metrics']['env_size']
+                    # from  Value
+                    call_duration = content['values']['value']
+                    value = content['values']['value']
 
-                for keys in content['metrics']:
-                    print keys + " = " + content['metrics'][keys]
-
-                print(content['metrics'])
-                print(content['values'])
-
-                self.s.labels('VE001', 'Run001', loop, level, 10000, '0').observe(17)
-
+                    self.s.labels(instance, run_id, loop, packaging_level, quantity, env_size,
+                                  call_duration, int(round(time.time() * 1000))).observe(value)
                 # Execute anything
         except Exception as e:
             print("Metric Service : Exception could not <publish_metric>")

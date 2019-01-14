@@ -46,7 +46,7 @@ class Metric_Controller:
                 instance = content['metrics']['instance']
                 run_id = content['metrics']['run_id']
                 for keys in content['metrics']:
-                    print keys + " = " + content['metrics'][keys]
+                    print(keys + " = " + content['metrics'][keys])
 
                 print(content['metrics'])
                 print(content['values'])
